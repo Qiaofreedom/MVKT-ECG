@@ -386,7 +386,7 @@ def kd_ce_loss(logits_S, logits_T, temperature):
     return loss
 
 
-def multi_label_KL_loss(logits_S, logits_T, temperature):
+def multi_label_KL_loss(logits_S, logits_T, temperature):  # 用的是这里
     logits_S = logits_S.sigmoid().unsqueeze(2)
     logits_T = logits_T.sigmoid().unsqueeze(2)
     

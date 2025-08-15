@@ -223,7 +223,7 @@ def main():
     # plot network
     # vizNet(model, args.modeldir)
     # optionally resume from a checkpoint
-    if args.resume:
+    if args.resume:  # 用于在训练中断后从之前保存的 checkpoint 恢复训练。
         if os.path.isfile(args.resume):
             print("=> loading checkpoint '{}'".format(args.resume))
             checkpoint = torch.load(args.resume)

@@ -5,7 +5,7 @@ from .memory import ContrastMemory
 eps = 1e-7
 
 
-class CRDLoss(nn.Module):
+class CRDLoss(nn.Module):   # Contrastive Lead-information Transferring 部分。也就是论文里面的 CLT函数
     """CRD Loss function
     includes two symmetric parts:
     (a) using teacher as anchor, choose positive and negatives over the student side
@@ -50,7 +50,7 @@ class CRDLoss(nn.Module):
         return loss
 
 
-class ContrastLoss(nn.Module):
+class ContrastLoss(nn.Module):  # CLT函数部分
     """
     contrastive loss, corresponding to Eq (18)
     """

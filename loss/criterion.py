@@ -18,7 +18,7 @@ class CRDLoss(nn.Module):
         args.nce_k: number of negatives paired with each positive
         args.nce_t: the temperature
         args.nce_m: the momentum for updating the memory buffer
-        args.n_data: the number of samples in the training set, therefor the memory buffer is: args.n_data x args.feat_dim
+        args.n_data: the number of samples in the training set, therefor the memory buffer is: args.n_data x args.feat_dim  # 这里包含的是一个训练集的所有样本
     """
     def __init__(self, args):
         super(CRDLoss, self).__init__()

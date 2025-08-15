@@ -365,7 +365,7 @@ def train(train_loader, model, criterion_cls, optimizer, epoch, args):
         top5.update(prec5[0], signal.size(0))
 
         # compute gradient and do SGD step
-        optimizer.zero_grad()
+        optimizer.zero_grad()  # 用于清除上一次反向传播中累计的梯度
         loss.backward()
         ### avoid NAN
         # nn.utils.clip_grad_norm(model.parameters(), max_norm=10.0)

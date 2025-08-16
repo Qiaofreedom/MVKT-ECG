@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-def multi_label_KL_loss(logits_S, logits_T, temperature, num_classes):
+def multi_label_KL_loss(logits_S, logits_T, temperature, num_classes):  # 论文用的这个地方
     logits_S = logits_S.sigmoid().unsqueeze(2)
     logits_T = logits_T.sigmoid().unsqueeze(2)
     

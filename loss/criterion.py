@@ -81,19 +81,23 @@ class ContrastLoss(nn.Module):  # CLT损失函数部分。 实现对比损失公
         # loss for positive pair
         P_pos = x.select(1, 0)  # positive logits。 # 取第0列，即正样本得分，形状为 [B]。 P_pos 是每个 anchor 与它正样本之间的匹配分数（例如 cosine 相似度或者 dot product）
         #print(P_pos.shape)
+        
         log_D1 = torch.div(P_pos, P_pos.add(m * Pn + eps)).log_()  
+        
         # “计算 anchor 与其正样本之间相似度的 softmax log 概率，目标是最大化这个值，从而拉近正对距离，推远负对。
-        # 计算正样本的 log-softmax  概率部分（InfoNCE）。m * Pn + eps是负样本的总概率，m * Pn就是 InfoNCE 中的 噪声对比项，eps 是为了数值稳定性（防止除以0）
-        # InfoNCE 的核心：maximize the log probability of the correct (positive) pair among all (positive + negatives)。
+        # 计算正样本的 log-softmax  概率部分（NCE）。m * Pn + eps是负样本的总概率，m * Pn就是 NCE 中的 噪声对比项，eps 是为了数值稳定性（防止除以0）
+
 
         # loss for K negative pair
         P_neg = x.narrow(1, 1, m)  # anchor 和 K 个负样本的打分，相当于 x[:, 1:]
+        # dim=1：在第 1 维（即列的方向）操作；start=1：从第 1 列开始（注意是从第 1 列，不包括第 0 列）；length=m：总共提取 m 列（即负样本个数，m = K）
         #print(P_neg.shape)
         log_D0 = torch.div(P_neg.clone().fill_(m * Pn), P_neg.add(m * Pn + eps)).log_()   # 负样本对应的 log softmax 概率部分
 
         loss = - (log_D1.sum(0) + log_D0.view(-1, 1).sum(0)) / bsz  # 总体损失：正负样本对的 softmax 对数概率总和，取反，做均值。
 
         return loss
+
 
 
 class Embed(nn.Module): # 投影网络（MLP + 归一化），将原始特征投影到对比空间。

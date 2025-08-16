@@ -5,7 +5,7 @@ from .memory import ContrastMemory
 eps = 1e-7
 
 # 该代码是 MVKT-ECG 论文中 CLT（Contrastive Lead-information Transferring）对比学习损失函数的实现，采用了 双向 anchor 对比策略，即 Teacher 和 Student 都分别作为 anchor 参与计算。
-# 采用的确实是 Instance Discrimination（简称 Instance Disc）方法
+
 
 class CRDLoss(nn.Module):   # Contrastive Lead-information Transferring 部分。也就是论文里面的 CLT函数
     """CRD Loss function
@@ -28,7 +28,7 @@ class CRDLoss(nn.Module):   # Contrastive Lead-information Transferring 部分�
         self.embed_t = Embed(args.t_dim, args.feat_dim)
         self.contrast = ContrastMemory(args.feat_dim, args.n_data, args.nce_k, args.nce_t, args.nce_m)
         # 创建 memory bank，用于构建负样本对比空间。nce_k: 每个正样本配对的负样本数量。n_data: 训练集总样本数量。nce_t: 温度参数（如 0.07）。nce_m: memory 更新的 momentum。
-        self.criterion_t = ContrastLoss(args.n_data)  # 分别定义以 Teacher 或 Student 为 anchor 的对比损失。
+        self.criterion_t = ContrastLoss(args.n_data)  # 分别定义以 Teacher 或 Student 为 anchor 的对比损失loss。
         self.criterion_s = ContrastLoss(args.n_data)
 
     def forward(self, f_s, f_t, idx, contrast_idx=None): 
@@ -86,7 +86,7 @@ class ContrastLoss(nn.Module):  # CLT损失函数部分。 实现对比损失公
         log_D1 = torch.div(P_pos, P_pos.add(m * Pn + eps)).log_()  
         
         # “计算 anchor 与其正样本之间相似度的 softmax log 概率，目标是最大化这个值，从而拉近正对距离，推远负对。
-        # 计算正样本的 log-softmax  概率部分（NCE）。m * Pn + eps是负样本的总概率，m * Pn就是 NCE 中的 噪声对比项，eps 是为了数值稳定性（防止除以0）
+        # 计算正样本的 log-softmax  概率部分（infoNCE）。m * Pn + eps是负样本的总概率，m * Pn就是 infoNCE 中的 噪声对比项，eps 是为了数值稳定性（防止除以0）
 
 
         # loss for K negative pair

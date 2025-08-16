@@ -5,6 +5,7 @@ from .memory import ContrastMemory
 eps = 1e-7
 
 # 该代码是 MVKT-ECG 论文中 CLT（Contrastive Lead-information Transferring）对比学习损失函数的实现，采用了 双向 anchor 对比策略，即 Teacher 和 Student 都分别作为 anchor 参与计算。
+# 采用的确实是 Instance Discrimination（简称 Instance Disc）方法
 
 class CRDLoss(nn.Module):   # Contrastive Lead-information Transferring 部分。也就是论文里面的 CLT函数
     """CRD Loss function

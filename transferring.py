@@ -50,7 +50,7 @@ parser.add_argument('-b', '--beta', type=float, default=None, help='weight balan
 # KL distillation
 parser.add_argument('--kd_T', type=float, default=1,  help='temperature for KD distillation')
 
-# NCE distillation
+# NCE distillation 对比学习里面的 NCE损失函数。 
 parser.add_argument('--feat_dim', default=128, type=int, help='feature dimension')
 parser.add_argument('--mode', default='exact', type=str, choices=['exact', 'relax'])
 parser.add_argument('--nce_k', default=1024, type=int, help='number of negative samples for NCE')

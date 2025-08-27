@@ -262,7 +262,7 @@ def main():
     args.s_dim = feat_s[-1].shape[1]
     args.t_dim = feat_t[-1].shape[1]
     args.n_data = n_data   #TODO
-    criterion_kd = CRDLoss(args) # 对比学习用到的函数
+    criterion_kd = CRDLoss(args) # 对比学习用到的损失函数
     module_list.append(criterion_kd.embed_s)
     module_list.append(criterion_kd.embed_t)
     trainable_list.append(criterion_kd.embed_s)
@@ -271,7 +271,7 @@ def main():
 
     criterion_list = nn.ModuleList([])
     criterion_list.append(criterion_cls)    # classification loss
-    criterion_list.append(criterion_kd)     # other knowledge distillation loss
+    criterion_list.append(criterion_kd)     # other knowledge distillation loss 对比学习的损失函数
     criterion_list.append(criterion_dist)
     
     
@@ -466,7 +466,7 @@ def train(epoch, train_loader, module_list, criterion_list, optimizer, args):
     end = time.time()
     for idx, data in enumerate(train_loader):
         # measure data loading time
-        input, target, index, contrast_idx = data
+        input, target, index, contrast_idx = data #
         data_time.update(time.time() - end)
         signal = input.float()    
         if torch.cuda.is_available():
@@ -476,38 +476,50 @@ def train(epoch, train_loader, module_list, criterion_list, optimizer, args):
             
         target = target.float() # multi
         contrast_idx = contrast_idx.cuda()
-        feats_s, feat_s, logit_s = model_s(signal[:, [0], :], is_feat_crd=True)
+      
+        feats_s, feat_s, logit_s = model_s(signal[:, [0], :], is_feat_crd=True) #学生的特征
         with torch.no_grad():
             feats_t, feat_t, logit_t = model_t(signal, is_feat_crd=True)
-            feat_t = [f.detach() for f in feat_t]
+            feat_t = [f.detach() for f in feat_t] # 老师的特征
+          
         # cls + kl div
         '''if epoch == 6:
             print("输入：",input)
             print("教师输出：",logit_t)
             print("学生输出：",logit_s)
             print("标签：",target)'''
-        loss_cls = criterion_cls(logit_s, target)
-        loss_kl = multi_label_KL_loss(logit_s, logit_t, args.kd_T)
+      
+        loss_cls = criterion_cls(logit_s, target) #多标签分类损失
+        loss_kl = multi_label_KL_loss(logit_s, logit_t, args.kd_T) #蒸馏学习损失
+      
         # CRD
         f_s = feat_s[-1]
         f_t = feat_t[-1]
         #print(contrast_idx.shape)
-        loss_crd = criterion_crd(f_s, f_t, index, contrast_idx)
+        loss_crd = criterion_crd(f_s, f_t, index, contrast_idx) #对比学习损失
 
+      
         '''if epoch > 20:
             loss = args.gamma * loss_cls + args.alpha * loss_kl + args.beta * loss_crd 
         else:
             loss = args.gamma * loss_cls + 0 * loss_kl + args.beta * loss_crd'''
+
+      
+        # 计算损失函数
         loss = args.gamma * loss_cls + args.alpha * loss_kl + args.beta * loss_crd
+      
         # measure accuracy and record loss
         # multi_label
+      
         prec1, prec5 = multi_accuracy(logit_s, target, epoch=epoch, topk=(1, 1),)
 
+        # 损失函数更新
         losses.update(loss.item(), signal.size(0))
-        
         losses_kl.update(loss_kl.item(), signal.size(0))
         losses_cls.update(loss_cls.item(), signal.size(0))
         losses_crd.update(loss_crd.item(), signal.size(0))
+
+      
         #losses_dist.update(loss_dist.item(),signal.size(0))
 
         top1.update(prec1[0], signal.size(0))
@@ -521,8 +533,10 @@ def train(epoch, train_loader, module_list, criterion_list, optimizer, args):
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
+      
         # 'Loss_dist {loss_dist.val:.4f} ({loss_dist.avg:.4f})\t'
         # loss_dist=losses_dist,
+      
         if idx % args.print_freq == 0:
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
@@ -556,9 +570,9 @@ def validate(val_loader, model, criterion_cls, epoch):
             target = target.cuda(non_blocking=True)
             target = target.float() # multi
         
-            signal = signal[:,[0],:]
+            signal = signal[:,[0],:] #学生单导联
             output = model(signal)
-            loss = criterion_cls(output, target)
+            loss = criterion_cls(output, target) #多标签分类损失
 
             # measure accuracy and record loss
 
@@ -659,7 +673,7 @@ def evaluate(test_loader, model): # 学生的测试部分
             signal = input
             if args.gpu is not None:
                 signal = signal.cuda(non_blocking=True).float()
-            signal = signal[:,[0],:]
+            signal = signal[:,[0],:] # 学生单导联
             output = model(x=signal)
             output = torch.sigmoid(output)
             results.append(output.cpu())

@@ -262,7 +262,7 @@ def main():
     args.s_dim = feat_s[-1].shape[1]
     args.t_dim = feat_t[-1].shape[1]
     args.n_data = n_data   #TODO
-    criterion_kd = CRDLoss(args)
+    criterion_kd = CRDLoss(args) # 对比学习用到的函数
     module_list.append(criterion_kd.embed_s)
     module_list.append(criterion_kd.embed_t)
     trainable_list.append(criterion_kd.embed_s)

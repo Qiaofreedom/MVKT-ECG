@@ -648,7 +648,7 @@ def validate(val_loader, model, criterion_cls, epoch):
 
     return losses.avg, top1.avg, top5.avg'''
 
-def evaluate(test_loader, model):
+def evaluate(test_loader, model): # 学生的测试部分
     # switch to evaluate mode
     model.eval()
     results = []
@@ -667,7 +667,7 @@ def evaluate(test_loader, model):
     results = torch.cat(results)
     targets = torch.cat(targets)
     return results, targets  
-def evaluate2(test_loader, model):
+def evaluate2(test_loader, model): #老师的测试部分
     # switch to evaluate mode
     model.eval()
     results = []
